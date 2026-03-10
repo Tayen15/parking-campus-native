@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - DB_HOST=db
+      - DB_USER=${DB_USER:-parking_user}
+      - DB_PASSWORD=${DB_PASSWORD:-parking123}
+      - DB_NAME=${DB_NAME:-dbparkir}
+    depends_on:
+      - db
+    networks:
+      - parking-network
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: ${DB_NAME:-dbparkir}
+      MYSQL_USER: ${DB_USER:-parking_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-parking123}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./dbparkir.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - parking-network
+
+volumes:
+  db_data:
+
+networks:
+  parking-network:
+    driver: bridge
